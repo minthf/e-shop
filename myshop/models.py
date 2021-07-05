@@ -9,6 +9,7 @@ class Category(models.Model):
     title = models.CharField(verbose_name='Title', max_length=50, unique=True)
     description = models.CharField(verbose_name='Description', max_length=100)
 
+
     class Meta:
         verbose_name_plural = 'Categories'
 
@@ -71,11 +72,15 @@ def update_product_rate(sender, instance, **kwargs):
 
 class CartItem(models.Model):
     """Cart item in clients carts"""
-    status = models.BooleanField()
     client = models.ForeignKey(User, related_name='cart_owner', on_delete=models.CASCADE)
+    status = models.BooleanField()
     product = models.ForeignKey(Product, related_name='cart_item', on_delete=models.CASCADE)
-    quantity = models.IntegerField(default=0, validators=[MinValueValidator(0)])
+    quantity = models.IntegerField(default=1, validators=[MinValueValidator(0)])
     price = models.IntegerField(default=0, validators=[MinValueValidator(0)])
 
     def __str__(self):
         return f"{self.client} {self.product} - {self.quantity}"
+
+@receiver(signals.pre_save, sender=CartItem)
+def set_product_price(sender, instance, **kwargs):
+    instance.price = instance.product.price
