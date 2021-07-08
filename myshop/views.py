@@ -3,7 +3,7 @@ from rest_framework.views import APIView
 from rest_framework import status
 from django.http import Http404
 from .models import Product, Comment, CartItem, Category
-from .serializers import ProductSerializer, CommentSerializer, CartItemSerializer, CategorySerializer
+from .serializers import ProductSerializer, CommentSerializer, CartItemSerializer, CategorySerializer, CartSerializer
 from django.contrib.auth.models import User
 
 class ProductsListView(APIView):
@@ -34,8 +34,8 @@ class CategoriesView(APIView):
 
 class CartView(APIView):
     def get(self, request):
-        cart_items = CartItem.objects.all()
-        serializer = CartItemSerializer(cart_items, many=True)
+        cart_items = CartItem.objects.filter(status=True)
+        serializer = CartSerializer({'products':cart_items})
         return Response(serializer.data)
 
 class CommentsView(APIView):

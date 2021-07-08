@@ -73,7 +73,7 @@ def update_product_rate(sender, instance, **kwargs):
 class CartItem(models.Model):
     """Cart item in clients carts"""
     client = models.ForeignKey(User, related_name='cart_owner', on_delete=models.CASCADE)
-    status = models.BooleanField()
+    status = models.BooleanField(default=True)
     product = models.ForeignKey(Product, related_name='cart_item', on_delete=models.CASCADE)
     quantity = models.IntegerField(default=1, validators=[MinValueValidator(0)])
     price = models.IntegerField(default=0, validators=[MinValueValidator(0)])
@@ -83,4 +83,5 @@ class CartItem(models.Model):
 
 @receiver(signals.pre_save, sender=CartItem)
 def set_product_price(sender, instance, **kwargs):
-    instance.price = instance.product.price
+    instance.price = instance.product.price - (instance.product.price * (instance.product.discount / 100))
+
