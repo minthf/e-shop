@@ -33,7 +33,7 @@ class PictureSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ProductPicture
-        fields = ['picture']
+        fields = '__all__'
 
 class ProductSerializer(serializers.ModelSerializer):
     pictures = PictureSerializer(many=True)
@@ -42,6 +42,10 @@ class ProductSerializer(serializers.ModelSerializer):
         model = Product
         fields = "__all__"
 
+class ProductCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product
+        fields = ['title', 'description','price','discount','category', 'supplier']
 
 class CartItemSerializer(serializers.ModelSerializer):
     class Meta:

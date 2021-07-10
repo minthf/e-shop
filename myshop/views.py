@@ -2,9 +2,18 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
 from django.http import Http404
-from .models import Product, Comment, CartItem, Category
-from .serializers import ProductSerializer, CommentSerializer, CartItemSerializer, CategorySerializer, CartSerializer
+from .models import Product, Comment, CartItem, Category, ProductPicture
+from .serializers import ProductSerializer, CommentSerializer, CartItemSerializer, CategorySerializer, CartSerializer, ProductCreateSerializer, PictureSerializer
 from django.contrib.auth.models import User
+
+
+def get_object(obj, pk):
+    try:
+        return obj.objects.get(pk=pk)
+    except obj.DoesNotExist:
+        raise Http404
+
+
 
 class ProductsListView(APIView):
 
@@ -13,17 +22,24 @@ class ProductsListView(APIView):
         serializer = ProductSerializer(products, many=True)
         return Response(serializer.data)
 
-class ProductDetailView(APIView):
-    def get_object(self, pk):
-        try:
-            return Product.objects.get(pk=pk)
-        except Product.DoesNotExist:
-            raise Http404
+    def post(self, request):
+        serializer = ProductCreateSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+class ProductDetailView(APIView):
     def get(self, request, pk):
-        product = self.get_object(pk)
+        product = get_object(Product, pk)
         serializer = ProductSerializer(product)
         return Response(serializer.data)
+
+    def delete(self, request, pk):
+        product = self.get_object(pk)
+        product.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 class CategoriesView(APIView):
     def get(self, request):
@@ -39,13 +55,31 @@ class CartView(APIView):
         return Response(serializer.data)
 
 class CommentsView(APIView):
-    def get_object(self, pk):
-        try:
-            return Product.objects.get(pk=pk)
-        except Product.DoesNotExist:
-            raise Http404
-
     def get(self, request, pk):
         comments = Comment.objects.filter(comment_of_reply=None, product=pk)
         serializer = CommentSerializer(comments, many=True)
         return Response(serializer.data)
+
+class ProductPicturesListView(APIView):
+
+    def get(self, request, pk):
+        pictures = ProductPicture.objects.filter(product=pk)
+        serializer = PictureSerializer(pictures, many=True)
+        return Response(serializer.data)
+
+    def post(self, request, pk):
+        picture = request.data['picture']
+        ProductPicture.objects.create(product=Product.objects.get(id=pk), picture=picture)
+        return Response(status=status.HTTP_201_CREATED)
+
+
+class ProductPictureDetailView(APIView):
+    def get(self, request, pk, alt_pk):
+        picture = ProductPicture.objects.get(id=alt_pk)
+        serializer = PictureSerializer(picture)
+        return Response(serializer.data)
+
+    def delete(self, request, pk, alt_pk):
+        picture = ProductPicture.objects.get(id=alt_pk)
+        picture.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

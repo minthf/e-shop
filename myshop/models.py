@@ -85,3 +85,14 @@ class CartItem(models.Model):
 def set_product_price(sender, instance, **kwargs):
     instance.price = instance.product.price - (instance.product.price * (instance.product.discount / 100))
 
+
+class Order(models.Model):
+    client = models.ForeignKey(User, related_name='order_owner', on_delete=models.CASCADE)
+    date = models.DateTimeField(auto_now_add=True)
+
+
+class OrderItem(models.Model):
+    product = models.ForeignKey(Product, related_name='order_item', on_delete=models.CASCADE)
+    quantity = models.IntegerField(default=1, validators=[MinValueValidator(0)])
+    price = models.IntegerField(default=0, validators=[MinValueValidator(0)])
+    order = models.ForeignKey(Order, related_name='order', on_delete=models.CASCADE)
