@@ -47,6 +47,13 @@ class ProductCreateSerializer(serializers.ModelSerializer):
         model = Product
         fields = ['title', 'description','price','discount','category', 'supplier']
 
+    # def update(self, instance, validated_data):
+    #     print('arstarstarstarst')
+    #     for key, value in validated_data.items():
+    #         setattr(instance, key, value)
+    #     instance.save()
+    #     return instance
+
 class CartItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = CartItem

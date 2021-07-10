@@ -13,8 +13,6 @@ def get_object(obj, pk):
     except obj.DoesNotExist:
         raise Http404
 
-
-
 class ProductsListView(APIView):
 
     def get(self, request):
@@ -29,6 +27,7 @@ class ProductsListView(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 class ProductDetailView(APIView):
     def get(self, request, pk):
         product = get_object(Product, pk)
@@ -36,9 +35,18 @@ class ProductDetailView(APIView):
         return Response(serializer.data)
 
     def delete(self, request, pk):
-        product = self.get_object(pk)
+        product = get_object(Product, pk)
         product.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def patch(self, request, pk):
+        product = get_object(Product, pk)
+        serializer = ProductCreateSerializer(product, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
 
 
 class CategoriesView(APIView):
