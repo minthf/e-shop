@@ -3,7 +3,7 @@ from rest_framework.views import APIView
 from rest_framework import status
 from django.http import Http404
 from .models import Product, Comment, CartItem, Category, ProductPicture
-from .serializers import ProductSerializer, CommentSerializer, CartItemSerializer, CategorySerializer, CartSerializer, ProductCreateSerializer, PictureSerializer
+from .serializers import ProductSerializer, CommentSerializer, CartItemSerializer, CategorySerializer, CartSerializer, ProductCreateSerializer, PictureSerializer, CommentCreateSerializer
 from django.contrib.auth.models import User
 
 
@@ -104,16 +104,46 @@ class CategoryDetailView(APIView):
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+class CommentsView(APIView):
+    def get(self, request, pk):
+        comments = Comment.objects.filter(comment_of_reply=None, product=pk)
+        serializer = CommentSerializer(comments, many=True)
+        return Response(serializer.data)
+    
+    def post(self, request, pk):
+        if request.data.get('rate') and request.data.get('comment_of_reply'):
+            return Response(status=status.HTTP_400_BAD_REQUEST) 
+        serializer = CommentCreateSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            print(serializer)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class CommentDetailView(APIView):
+    def get(self, request, pk, alt_pk):
+        comment = get_object(Comment, alt_pk)
+        serializer = CommentCreateSerializer(comment)
+        return Response(serializer.data)
+
+    def delete(self, request, pk, alt_pk):
+        comment = get_object(Comment, alt_pk)
+        comment.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def patch(self, request, pk, alt_pk):
+        comment = get_object(Comment, alt_pk)
+        serializer = CommentCreateSerializer(comment, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 class CartView(APIView):
     def get(self, request):
         cart_items = CartItem.objects.filter(status=True)
         serializer = CartSerializer({'products':cart_items})
         return Response(serializer.data)
 
-class CommentsView(APIView):
-    def get(self, request, pk):
-        comments = Comment.objects.filter(comment_of_reply=None, product=pk)
-        serializer = CommentSerializer(comments, many=True)
-        return Response(serializer.data)
 
 

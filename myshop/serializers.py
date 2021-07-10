@@ -25,6 +25,11 @@ class CommentSerializer(serializers.ModelSerializer):
         fields['replies'] = CommentSerializer(many=True)
         return fields
 
+class CommentCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Comment
+        fields = "__all__"
+
 class PictureSerializer(serializers.ModelSerializer):
     picture = serializers.SerializerMethodField()
     

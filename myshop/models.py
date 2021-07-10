@@ -24,7 +24,7 @@ class Product(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0)])
     discount = models.IntegerField(default=0, validators=[MaxValueValidator(100), MinValueValidator(0)])
     category = models.ForeignKey(Category, related_name='category', on_delete=models.CASCADE)
-    supplier = models.ForeignKey(User, related_name='supplier', on_delete=models.CASCADE)
+    supplier = models.ForeignKey(User, related_name='supplier', on_delete=models.CASCADE, editable=False)
     rating = models.DecimalField(default=0, max_digits=5, decimal_places=2, validators=[MinValueValidator(0)])
     quantity_rates = models.IntegerField(default=0, validators=[MinValueValidator(0)])
 
@@ -48,7 +48,7 @@ class Comment(models.Model):
     ]
 
     product = models.ForeignKey(Product, related_name='comment', on_delete=models.CASCADE)
-    client = models.ForeignKey(User, related_name='comment_author', on_delete=models.CASCADE)
+    client = models.ForeignKey(User, related_name='comment_author', on_delete=models.CASCADE, editable=False)
     rate = models.IntegerField(choices=rates, blank=True, null=True)
     content = models.CharField(verbose_name='Content', max_length=200)
     creation_date = models.DateTimeField(auto_now_add=True)
@@ -61,7 +61,9 @@ class Comment(models.Model):
 @receiver(signals.pre_save, sender=Comment)
 def update_product_rate(sender, instance, **kwargs):
     """ Update product rating when added or changed rate in comments"""
-    if instance.id:
+    if instance.comment_of_reply:
+        pass
+    elif instance.id:
         old_comment = Comment.objects.get(pk=instance.id)
         instance.product.rating = ((instance.product.rating*instance.product.quantity_rates)+instance.rate-old_comment.rate)/instance.product.quantity_rates
     else:
@@ -72,7 +74,7 @@ def update_product_rate(sender, instance, **kwargs):
 
 class CartItem(models.Model):
     """Cart item in clients carts"""
-    client = models.ForeignKey(User, related_name='cart_owner', on_delete=models.CASCADE)
+    client = models.ForeignKey(User, related_name='cart_owner', on_delete=models.CASCADE, editable=False)
     status = models.BooleanField(default=True)
     product = models.ForeignKey(Product, related_name='cart_item', on_delete=models.CASCADE)
     quantity = models.IntegerField(default=1, validators=[MinValueValidator(0)])
@@ -87,7 +89,7 @@ def set_product_price(sender, instance, **kwargs):
 
 
 class Order(models.Model):
-    client = models.ForeignKey(User, related_name='order_owner', on_delete=models.CASCADE)
+    client = models.ForeignKey(User, related_name='order_owner', on_delete=models.CASCADE, editable=False)
     date = models.DateTimeField(auto_now_add=True)
 
 

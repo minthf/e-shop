@@ -11,5 +11,6 @@ urlpatterns = [
     path('product_detail/<int:pk>/pictures/', ProductPicturesListView.as_view(), name='products-pictures'),
     path('product_detail/<int:pk>/pictures/<int:alt_pk>/', ProductPictureDetailView.as_view(), name='products-pictures-detail'),
     path('comments_of_product/<int:pk>/', CommentsView.as_view(), name='comments-of-product'),
+    path('comments_of_product/<int:pk>/<int:alt_pk>', CommentDetailView.as_view(), name='comment-detail'),
     path('cart/', CartView.as_view(), name='cart')
 ]
