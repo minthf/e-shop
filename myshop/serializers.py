@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Product, Category, CartItem, Comment, ProductPicture
+from .models import Product, Category, CartItem, Comment, ProductPicture, OrderItem, Order
 from django.contrib.auth.models import User
 from decouple import config
 
@@ -25,7 +25,7 @@ class CommentSerializer(serializers.ModelSerializer):
         fields['replies'] = CommentSerializer(many=True)
         return fields
 
-class CommentCreateSerializer(serializers.ModelSerializer):
+class CommentDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
         fields = "__all__"
@@ -45,19 +45,12 @@ class ProductSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        fields = "__all__"
+        exclude = ['quantity_rates',]
 
 class ProductCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = ['title', 'description','price','discount','category', 'supplier']
-
-    # def update(self, instance, validated_data):
-    #     print('arstarstarstarst')
-    #     for key, value in validated_data.items():
-    #         setattr(instance, key, value)
-    #     instance.save()
-    #     return instance
 
 class CartItemSerializer(serializers.ModelSerializer):
     class Meta:
@@ -75,3 +68,17 @@ class CartSerializer(serializers.Serializer):
             total_price += product.price * product.quantity
 
         return total_price
+
+
+
+class OrderItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OrderItem
+        fields = "__all__"
+
+class OrderSerializer(serializers.ModelSerializer):
+    order_items = OrderItemSerializer(many=True)
+
+    class Meta:
+        model = Order
+        fields = "__all__"
