@@ -75,7 +75,6 @@ def update_product_rate(sender, instance, **kwargs):
 class CartItem(models.Model):
     """Cart item in clients carts"""
     client = models.ForeignKey(User, related_name='cart_owner', on_delete=models.CASCADE)
-    status = models.BooleanField(default=True)
     product = models.ForeignKey(Product, related_name='cart_item', on_delete=models.CASCADE)
     quantity = models.IntegerField(default=1, validators=[MinValueValidator(0)])
     price = models.IntegerField(default=0, validators=[MinValueValidator(0)])
@@ -89,9 +88,16 @@ def set_product_price(sender, instance, **kwargs):
 
 
 class Order(models.Model):
+    statuses = [
+        ('ordered', 'ordered'),
+        ('paid', 'paid'),
+        ('shipped', 'shipped'),
+        ('failed', 'failed')
+    ]
     client = models.ForeignKey(User, related_name='order_owner', on_delete=models.CASCADE)
     date = models.DateTimeField(auto_now_add=True)
-    total_price = models.IntegerField()
+    total_price = models.IntegerField(validators=[MinValueValidator(0)])
+    status = models.CharField(choices=statuses, default='ordered', max_length=8)
 
 
 class OrderItem(models.Model):

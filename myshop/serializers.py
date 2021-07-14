@@ -69,8 +69,6 @@ class CartSerializer(serializers.Serializer):
 
         return total_price
 
-
-
 class OrderItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderItem
@@ -82,3 +80,4 @@ class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = "__all__"
+

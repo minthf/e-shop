@@ -187,8 +187,14 @@ class CartDetailView(APIView):
 
 
 class OrderCreateView(APIView):
-    def get(self, request):
-        cart_items = CartItem.objects.filter(status=True)
+    def post(self, request):
+        if not request.data.get('ids') or type(request.data.get('ids')) != list:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+        cart_items = CartItem.objects.filter(id__in=request.data['ids'])
+        if not cart_items:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
         serializer = CartSerializer({'products':cart_items})
         order = Order.objects.create(client=User.objects.get(id=1), total_price=serializer.data['total_price'])
         for cart_item in serializer.data['products']:
@@ -203,6 +209,7 @@ class OrderCreateView(APIView):
             cart_item.delete()
         sserializer = OrderSerializer(order)
         return Response(sserializer.data)
+
 
 class OrderListView(APIView):
     def get(self, request):
