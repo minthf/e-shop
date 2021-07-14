@@ -28,7 +28,12 @@ class CommentSerializer(serializers.ModelSerializer):
 class CommentDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
-        fields = "__all__"
+        exclude = ['client', 'product']
+
+class CommentPatchSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Comment
+        fields = ['rate', 'content']
 
 class PictureSerializer(serializers.ModelSerializer):
     picture = serializers.SerializerMethodField()
@@ -50,12 +55,12 @@ class ProductSerializer(serializers.ModelSerializer):
 class ProductCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
-        fields = ['title', 'description','price','discount','category', 'supplier']
+        fields = ['title', 'description','price','discount','category']
 
 class CartItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = CartItem
-        fields = "__all__"
+        exclude = ['client']
 
 
 class CartSerializer(serializers.Serializer):
@@ -68,6 +73,11 @@ class CartSerializer(serializers.Serializer):
             total_price += product.price * product.quantity
 
         return total_price
+
+class CartPatchSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CartItem
+        fields = ['quantity',]
 
 class OrderItemSerializer(serializers.ModelSerializer):
     class Meta:

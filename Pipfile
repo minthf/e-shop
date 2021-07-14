@@ -9,6 +9,7 @@ djangorestframework = "*"
 pillow = "*"
 psycopg2 = "*"
 python-decouple = "*"
+djoser = "*"
 
 [dev-packages]
 
