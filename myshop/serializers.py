@@ -28,7 +28,7 @@ class CommentSerializer(serializers.ModelSerializer):
 class CommentDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
-        exclude = ['client', 'product']
+        exclude = ['user', 'product']
 
 class CommentPatchSerializer(serializers.ModelSerializer):
     class Meta:
@@ -60,7 +60,7 @@ class ProductCreateSerializer(serializers.ModelSerializer):
 class CartItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = CartItem
-        exclude = ['client']
+        exclude = ['user']
 
 
 class CartSerializer(serializers.Serializer):
