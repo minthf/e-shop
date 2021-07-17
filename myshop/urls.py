@@ -5,9 +5,9 @@ from .views import *
 
 urlpatterns = [
     path('categories/', CategoriesView.as_view(), name='categories-list'),
-    path('categories/<int:pk>/', CategoryDetailView.as_view(), name='categories-detail'),
+    path('categories/<int:pk>/', CategoryDetailView.as_view(), name='category-detail'),
     path('products/', ProductsListView.as_view(), name='products-list'),
-    path('products/<int:pk>/', ProductDetailView.as_view(), name='products-detail'),
+    path('products/<int:pk>/', ProductDetailView.as_view(), name='product-detail'),
     path('products/<int:pk>/pictures/', ProductPicturesListView.as_view(), name='products-pictures'),
     path('products/<int:pk>/pictures/<int:alt_pk>/', ProductPictureDetailView.as_view(), name='products-pictures-detail'),
     path('products/<int:pk>/comments/', CommentsView.as_view(), name='comments-of-product'),

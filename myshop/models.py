@@ -105,9 +105,15 @@ class Order(models.Model):
     total_price = models.IntegerField(validators=[MinValueValidator(0)])
     status = models.CharField(choices=statuses, default='ordered', max_length=8)
 
+    def __str__(self):
+        return f"{self.id} {self.user} {self.status} {self.total_price}"
+
 
 class OrderItem(models.Model):
     product = models.ForeignKey(Product, related_name='product', on_delete=models.CASCADE)
     quantity = models.IntegerField(default=1, validators=[MinValueValidator(0)])
     price = models.IntegerField(default=0, validators=[MinValueValidator(0)])
     order = models.ForeignKey(Order, related_name='order_items', on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.id} {self.product} - {self.quantity}"

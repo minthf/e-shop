@@ -138,7 +138,6 @@ class CommentsView(APIView):
         serializer = CommentDetailSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(user=request.user, product=Product.objects.get(id=pk))
-            print(serializer)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -161,6 +160,9 @@ class CommentDetailView(APIView):
         self.check_object_permissions(request, comment)
 
         if comment.comment_of_reply and request.data.get('rate'):
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+        elif request.data.get('comment_of_reply'):
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
         serializer = CommentPatchSerializer(comment, data=request.data, partial=True)
