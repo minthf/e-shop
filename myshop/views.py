@@ -2,10 +2,38 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
 from django.http import Http404
-from .permissions import OwnerPermission, CartOwnerPermission, IsSupplierPermission, IsClientPermission, IsAdminUserOrReadOnly, ClientPermission
-from .models import Product, Comment, CartItem, Category, ProductPicture, OrderItem, Order, User
-from .serializers import ProductSerializer, CommentSerializer, CartItemSerializer, CategorySerializer, CartSerializer, ProductCreateSerializer, PictureSerializer, CommentDetailSerializer, OrderItemSerializer, OrderSerializer, CommentPatchSerializer, CartPatchSerializer
-from rest_framework.permissions import IsAuthenticatedOrReadOnly 
+from .permissions import (
+    OwnerPermission,
+    CartOwnerPermission,
+    IsSupplierPermission,
+    IsClientPermission,
+    IsAdminUserOrReadOnly,
+    ClientPermission,
+)
+from .models import (
+    Product,
+    Comment,
+    CartItem,
+    Category,
+    ProductPicture,
+    OrderItem,
+    Order,
+)
+from .serializers import (
+    ProductSerializer,
+    CommentSerializer,
+    CartItemSerializer,
+    CategorySerializer,
+    CartSerializer,
+    ProductCreateSerializer,
+    PictureSerializer,
+    CommentDetailSerializer,
+    OrderSerializer,
+    CommentPatchSerializer,
+    CartPatchSerializer,
+)
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
+
 
 def get_object(model, pk):
     try:
@@ -14,10 +42,9 @@ def get_object(model, pk):
         raise Http404
 
 
-
-
 class ProductsListView(APIView):
     permission_classes = [IsAuthenticatedOrReadOnly, IsSupplierPermission]
+
     def get(self, request):
         products = Product.objects.all()
         serializer = ProductSerializer(products, many=True)
@@ -32,7 +59,11 @@ class ProductsListView(APIView):
 
 
 class ProductDetailView(APIView):
-    permission_classes = [IsAuthenticatedOrReadOnly, OwnerPermission, IsSupplierPermission]
+    permission_classes = [
+        IsAuthenticatedOrReadOnly,
+        OwnerPermission,
+        IsSupplierPermission,
+    ]
 
     def get(self, request, pk):
         product = get_object(Product, pk)
@@ -50,14 +81,21 @@ class ProductDetailView(APIView):
     def patch(self, request, pk):
         product = get_object(Product, pk)
         self.check_object_permissions(request, product)
-        serializer = ProductCreateSerializer(product, data=request.data, partial=True)
+        serializer = ProductCreateSerializer(
+            product, data=request.data, partial=True
+        )
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        
+
+
 class ProductPicturesListView(APIView):
-    permission_classes = [IsAuthenticatedOrReadOnly, OwnerPermission, IsSupplierPermission]
+    permission_classes = [
+        IsAuthenticatedOrReadOnly,
+        OwnerPermission,
+        IsSupplierPermission,
+    ]
 
     def get(self, request, pk):
         pictures = ProductPicture.objects.filter(product=pk)
@@ -67,13 +105,19 @@ class ProductPicturesListView(APIView):
     def post(self, request, pk):
         product = get_object(Product, pk)
         self.check_object_permissions(request, product)
-        picture = request.data['picture']
-        ProductPicture.objects.create(product=Product.objects.get(id=pk), picture=picture)
+        picture = request.data["picture"]
+        ProductPicture.objects.create(
+            product=Product.objects.get(id=pk), picture=picture
+        )
         return Response(status=status.HTTP_201_CREATED)
 
 
 class ProductPictureDetailView(APIView):
-    permission_classes = [IsAuthenticatedOrReadOnly, OwnerPermission, IsSupplierPermission]
+    permission_classes = [
+        IsAuthenticatedOrReadOnly,
+        OwnerPermission,
+        IsSupplierPermission,
+    ]
 
     def get(self, request, pk, alt_pk):
         picture = get_object(ProductPicture, alt_pk)
@@ -101,7 +145,8 @@ class CategoriesView(APIView):
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)     
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 class CategoryDetailView(APIView):
     permission_classes = [IsAuthenticatedOrReadOnly, IsAdminUserOrReadOnly]
@@ -118,31 +163,41 @@ class CategoryDetailView(APIView):
 
     def patch(self, request, pk):
         category = get_object(Category, pk)
-        serializer = CategorySerializer(category, data=request.data, partial=True)
+        serializer = CategorySerializer(
+            category, data=request.data, partial=True
+        )
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 class CommentsView(APIView):
     permission_classes = [IsAuthenticatedOrReadOnly, IsClientPermission]
-    
+
     def get(self, request, pk):
         comments = Comment.objects.filter(comment_of_reply=None, product=pk)
         serializer = CommentSerializer(comments, many=True)
         return Response(serializer.data)
-    
+
     def post(self, request, pk):
-        if request.data.get('rate') and request.data.get('comment_of_reply'):
+        if request.data.get("rate") and request.data.get("comment_of_reply"):
             return Response(status=status.HTTP_400_BAD_REQUEST)
         serializer = CommentDetailSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save(user=request.user, product=Product.objects.get(id=pk))
+            serializer.save(
+                user=request.user, product=Product.objects.get(id=pk)
+            )
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 class CommentDetailView(APIView):
-    permission_classes = [IsAuthenticatedOrReadOnly, OwnerPermission, IsClientPermission]
+    permission_classes = [
+        IsAuthenticatedOrReadOnly,
+        OwnerPermission,
+        IsClientPermission,
+    ]
 
     def get(self, request, pk, alt_pk):
         comment = get_object(Comment, alt_pk)
@@ -159,24 +214,31 @@ class CommentDetailView(APIView):
         comment = get_object(Comment, alt_pk)
         self.check_object_permissions(request, comment)
 
-        if comment.comment_of_reply and request.data.get('rate'):
+        if comment.comment_of_reply and request.data.get("rate"):
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
-        elif request.data.get('comment_of_reply'):
+        elif request.data.get("comment_of_reply"):
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
-        serializer = CommentPatchSerializer(comment, data=request.data, partial=True)
+        serializer = CommentPatchSerializer(
+            comment, data=request.data, partial=True
+        )
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 class CartView(APIView):
-    permission_classes = [IsAuthenticatedOrReadOnly, OwnerPermission, ClientPermission]
+    permission_classes = [
+        IsAuthenticatedOrReadOnly,
+        OwnerPermission,
+        ClientPermission,
+    ]
 
     def get(self, request):
         cart_items = CartItem.objects.filter(user=request.user)
-        serializer = CartSerializer({'products':cart_items})
+        serializer = CartSerializer({"products": cart_items})
         return Response(serializer.data)
 
     def post(self, request):
@@ -184,11 +246,16 @@ class CartView(APIView):
         if serializer.is_valid():
             serializer.save(user=request.user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)          
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class CartDetailView(APIView):
-    permission_classes = [IsAuthenticatedOrReadOnly, CartOwnerPermission, ClientPermission]
+    permission_classes = [
+        IsAuthenticatedOrReadOnly,
+        CartOwnerPermission,
+        ClientPermission,
+    ]
+
     def get(self, request, pk):
         cart_item = get_object(CartItem, pk)
         self.check_object_permissions(request, cart_item)
@@ -204,10 +271,12 @@ class CartDetailView(APIView):
         cart_item.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    def patch(self, request, pk):    
+    def patch(self, request, pk):
         cart_item = get_object(CartItem, pk)
         self.check_object_permissions(request, cart_item)
-        serializer = CartPatchSerializer(cart_item, data=request.data, partial=True)
+        serializer = CartPatchSerializer(
+            cart_item, data=request.data, partial=True
+        )
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
@@ -216,26 +285,32 @@ class CartDetailView(APIView):
 
 class OrderCreateView(APIView):
     permission_classes = [IsAuthenticatedOrReadOnly, CartOwnerPermission]
+
     def post(self, request):
-        if not request.data.get('ids') or type(request.data.get('ids')) != list:
+        if (
+            not request.data.get("ids")
+            or type(request.data.get("ids")) != list
+        ):
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
-        cart_items = CartItem.objects.filter(id__in=request.data['ids'])
+        cart_items = CartItem.objects.filter(id__in=request.data["ids"])
         if not cart_items:
             return Response(status=status.HTTP_400_BAD_REQUEST)
-            
+
         for cart_item in cart_items:
             self.check_object_permissions(request, cart_item)
 
-        serializer = CartSerializer({'products':cart_items})
-        order = Order.objects.create(user=request.user, total_price=serializer.data['total_price'])
-        for cart_item in serializer.data['products']:
+        serializer = CartSerializer({"products": cart_items})
+        order = Order.objects.create(
+            user=request.user, total_price=serializer.data["total_price"]
+        )
+        for cart_item in serializer.data["products"]:
             OrderItem.objects.create(
-                product=Product.objects.get(id=cart_item['product']),
+                product=Product.objects.get(id=cart_item["product"]),
                 order=order,
-                quantity=cart_item['quantity'],
-                price=cart_item['price']
-                )
+                quantity=cart_item["quantity"],
+                price=cart_item["price"],
+            )
         for cart_item in cart_items:
             cart_item.delete()
         sserializer = OrderSerializer(order)
@@ -244,8 +319,8 @@ class OrderCreateView(APIView):
 
 class OrderListView(APIView):
     permission_classes = [IsAuthenticatedOrReadOnly, ClientPermission]
+
     def get(self, request):
         orders = Order.objects.filter(user=request.user)
         serializer = OrderSerializer(orders, many=True)
         return Response(serializer.data)
-
