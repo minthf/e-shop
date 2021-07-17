@@ -1,4 +1,5 @@
 from rest_framework.permissions import IsAuthenticated, BasePermission, SAFE_METHODS, IsAdminUser
+from .models import User
 
 class OwnerPermission(BasePermission):
     message = 'Only owner can post, patch or delete.'
