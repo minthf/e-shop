@@ -74,6 +74,9 @@ __pycache__/
 local_settings.py
 
 .env
+.env-db
 db.sqlite3
 images/products/**
 !images/products/.gitkeep
+/static/
+/postgres_data/

@@ -12,6 +12,8 @@ python-decouple = "*"
 djoser = "*"
 coverage = "*"
 flake8 = "*"
+gunicorn = "*"
+dj-database-url = "*"
 
 [dev-packages]
 

@@ -32,7 +32,7 @@ from .serializers import (
     CommentPatchSerializer,
     CartPatchSerializer,
 )
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
 
 
 def get_object(model, pk):
@@ -231,7 +231,7 @@ class CommentDetailView(APIView):
 
 class CartView(APIView):
     permission_classes = [
-        IsAuthenticatedOrReadOnly,
+        IsAuthenticated,
         OwnerPermission,
         ClientPermission,
     ]
@@ -251,7 +251,7 @@ class CartView(APIView):
 
 class CartDetailView(APIView):
     permission_classes = [
-        IsAuthenticatedOrReadOnly,
+        IsAuthenticated,
         CartOwnerPermission,
         ClientPermission,
     ]
@@ -284,7 +284,7 @@ class CartDetailView(APIView):
 
 
 class OrderCreateView(APIView):
-    permission_classes = [IsAuthenticatedOrReadOnly, CartOwnerPermission]
+    permission_classes = [IsAuthenticated, CartOwnerPermission]
 
     def post(self, request):
         if (
@@ -318,7 +318,7 @@ class OrderCreateView(APIView):
 
 
 class OrderListView(APIView):
-    permission_classes = [IsAuthenticatedOrReadOnly, ClientPermission]
+    permission_classes = [IsAuthenticated, ClientPermission]
 
     def get(self, request):
         orders = Order.objects.filter(user=request.user)
