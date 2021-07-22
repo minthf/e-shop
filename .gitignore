@@ -80,3 +80,4 @@ images/products/**
 !images/products/.gitkeep
 /static/
 /postgres_data/
+!.env-db-example
