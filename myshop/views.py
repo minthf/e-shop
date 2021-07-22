@@ -34,7 +34,11 @@ from .serializers import (
     CartPatchSerializer,
     PromocodeSerializer,
 )
-from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated, IsAdminUser
+from rest_framework.permissions import (
+    IsAuthenticatedOrReadOnly,
+    IsAuthenticated,
+    IsAdminUser,
+)
 
 
 def get_object(model, pk):
@@ -304,13 +308,22 @@ class OrderCreateView(APIView):
 
         serializer = CartSerializer({"products": cart_items})
         order = Order.objects.create(
-            user=request.user, price=serializer.data["total_price"], price_with_discount=serializer.data["total_price"]
+            user=request.user,
+            price=serializer.data["total_price"],
+            price_with_discount=serializer.data["total_price"],
         )
 
-        if request.data.get('promocode'):
+        if request.data.get("promocode"):
             try:
-                promocode = Promocode.objects.get(code=request.data.get('promocode'))
-                order.price_with_discount =float(serializer.data["total_price"]) - (float(serializer.data["total_price"])  * (promocode.discount / 100))
+                promocode = Promocode.objects.get(
+                    code=request.data.get("promocode")
+                )
+                order.price_with_discount = float(
+                    serializer.data["total_price"]
+                ) - (
+                    float(serializer.data["total_price"])
+                    * (promocode.discount / 100)
+                )
             except Promocode.DoesNotExist:
                 raise Http404
 

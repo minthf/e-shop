@@ -7,31 +7,53 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('myshop', '0002_auto_20210715_0852'),
+        ("myshop", "0002_auto_20210715_0852"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Promocode',
+            name="Promocode",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('code', models.CharField(max_length=50, unique=True, verbose_name='Promocode')),
-                ('discount', models.IntegerField(default=0, validators=[django.core.validators.MaxValueValidator(100), django.core.validators.MinValueValidator(0)])),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "code",
+                    models.CharField(
+                        max_length=50, unique=True, verbose_name="Promocode"
+                    ),
+                ),
+                (
+                    "discount",
+                    models.IntegerField(
+                        default=0,
+                        validators=[
+                            django.core.validators.MaxValueValidator(100),
+                            django.core.validators.MinValueValidator(0),
+                        ],
+                    ),
+                ),
             ],
         ),
         migrations.AlterField(
-            model_name='category',
-            name='description',
-            field=models.CharField(max_length=200, verbose_name='Description'),
+            model_name="category",
+            name="description",
+            field=models.CharField(max_length=200, verbose_name="Description"),
         ),
         migrations.AlterField(
-            model_name='product',
-            name='description',
-            field=models.CharField(max_length=500, verbose_name='Description'),
+            model_name="product",
+            name="description",
+            field=models.CharField(max_length=500, verbose_name="Description"),
         ),
         migrations.AlterField(
-            model_name='product',
-            name='title',
-            field=models.CharField(max_length=150, verbose_name='Title'),
+            model_name="product",
+            name="title",
+            field=models.CharField(max_length=150, verbose_name="Title"),
         ),
     ]

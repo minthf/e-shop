@@ -229,15 +229,16 @@ class OrerModelTest(TestCase):
 
     def test_order_name_is_id_user_product_quantity(self):
         order = Order.objects.create(user=self.user, price=1)
-        expected_order_name = (
-            f"{order.id} {order.user} {order.status} {order.price} - {order.price_with_discount}"
-        )
+        expected_order_name = f"{order.id} {order.user} {order.status} {order.price} - {order.price_with_discount}"
         self.assertEquals(expected_order_name, str(order))
+
 
 class PromocodeModelTest(TestCase):
     def setUp(self):
-        self.promocode = Promocode.objects.create(code='twenty', discount=20)
+        self.promocode = Promocode.objects.create(code="twenty", discount=20)
 
     def test_promocode_name_is_code_discount(self):
-        expected_promocode_name = f"{self.promocode.code} - {self.promocode.discount}"
+        expected_promocode_name = (
+            f"{self.promocode.code} - {self.promocode.discount}"
+        )
         self.assertEquals(expected_promocode_name, str(self.promocode))

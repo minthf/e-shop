@@ -470,7 +470,7 @@ class OrderCreateViewTest(APITestCase):
         self.cart_item5 = CartItem.objects.create(
             product=self.product, user=self.user2, quantity=5
         )
-        self.promocode = Promocode.objects.create(code='twenty', discount=20)
+        self.promocode = Promocode.objects.create(code="twenty", discount=20)
 
     def test_create_order(self):
         url = reverse("checkout-cart")
@@ -499,24 +499,27 @@ class OrderCreateViewTest(APITestCase):
         url = reverse("checkout-cart")
         self.client.force_authenticate(self.user1)
         data = {
-            "ids": 
-                [self.cart_item3.id, self.cart_item4.id],
-            "promocode": "twenty"   
-            }
+            "ids": [self.cart_item3.id, self.cart_item4.id],
+            "promocode": "twenty",
+        }
         response = self.client.post(url, data, format="json")
-        self.assertEqual(response.data.get('price_with_discount'), response.data.get('price')-(float((response.data.get('price'))) / 100 * 20))
+        self.assertEqual(
+            response.data.get("price_with_discount"),
+            response.data.get("price")
+            - (float((response.data.get("price"))) / 100 * 20),
+        )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_create_order_with_incorrect_promocode(self):
         url = reverse("checkout-cart")
         self.client.force_authenticate(self.user1)
         data = {
-            "ids": 
-                [self.cart_item3.id, self.cart_item4.id],
-            "promocode": "123"   
-            }
+            "ids": [self.cart_item3.id, self.cart_item4.id],
+            "promocode": "123",
+        }
         response = self.client.post(url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
 
 class CategoriesViewTest(APITestCase):
     def setUp(self):

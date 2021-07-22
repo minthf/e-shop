@@ -165,7 +165,9 @@ class Order(models.Model):
     )
     date = models.DateTimeField(auto_now_add=True)
     price = models.IntegerField(default=0, validators=[MinValueValidator(0)])
-    price_with_discount = models.IntegerField(default=0, validators=[MinValueValidator(0)])
+    price_with_discount = models.IntegerField(
+        default=0, validators=[MinValueValidator(0)]
+    )
     status = models.CharField(
         choices=statuses, default="ordered", max_length=8
     )
@@ -191,9 +193,12 @@ class OrderItem(models.Model):
 
 
 class Promocode(models.Model):
-    code = models.CharField(verbose_name="Promocode", max_length=50, unique=True)
+    code = models.CharField(
+        verbose_name="Promocode", max_length=50, unique=True
+    )
     discount = models.IntegerField(
-        default=0, validators=[MaxValueValidator(100), MinValueValidator(0)])
+        default=0, validators=[MaxValueValidator(100), MinValueValidator(0)]
+    )
 
     def __str__(self):
         return f"{self.code} - {self.discount}"
