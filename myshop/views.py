@@ -18,6 +18,7 @@ from .models import (
     ProductPicture,
     OrderItem,
     Order,
+    Promocode,
 )
 from .serializers import (
     ProductSerializer,
@@ -31,8 +32,9 @@ from .serializers import (
     OrderSerializer,
     CommentPatchSerializer,
     CartPatchSerializer,
+    PromocodeSerializer,
 )
-from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated, IsAdminUser
 
 
 def get_object(model, pk):
@@ -302,8 +304,16 @@ class OrderCreateView(APIView):
 
         serializer = CartSerializer({"products": cart_items})
         order = Order.objects.create(
-            user=request.user, total_price=serializer.data["total_price"]
+            user=request.user, price=serializer.data["total_price"], price_with_discount=serializer.data["total_price"]
         )
+
+        if request.data.get('promocode'):
+            try:
+                promocode = Promocode.objects.get(code=request.data.get('promocode'))
+                order.price_with_discount =float(serializer.data["total_price"]) - (float(serializer.data["total_price"])  * (promocode.discount / 100))
+            except Promocode.DoesNotExist:
+                raise Http404
+
         for cart_item in serializer.data["products"]:
             OrderItem.objects.create(
                 product=Product.objects.get(id=cart_item["product"]),
@@ -324,3 +334,43 @@ class OrderListView(APIView):
         orders = Order.objects.filter(user=request.user)
         serializer = OrderSerializer(orders, many=True)
         return Response(serializer.data)
+
+
+class PromocodeListView(APIView):
+    permission_classes = [IsAdminUser]
+
+    def get(self, request):
+        promocodes = Promocode.objects.all()
+        serializer = PromocodeSerializer(promocodes, many=True)
+        return Response(serializer.data)
+
+    def post(self, request):
+        serializer = PromocodeSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class PromocodeDetailView(APIView):
+    permission_classes = [IsAdminUser]
+
+    def get(self, request, pk):
+        promocodes = get_object(Promocode, pk)
+        serializer = PromocodeSerializer(promocodes)
+        return Response(serializer.data)
+
+    def delete(self, request, pk):
+        promocodes = get_object(Promocode, pk)
+        promocodes.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def patch(self, request, pk):
+        promocodes = get_object(Promocode, pk)
+        serializer = PromocodeSerializer(
+            promocodes, data=request.data, partial=True
+        )
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

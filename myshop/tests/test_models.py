@@ -7,6 +7,7 @@ from myshop.models import (
     OrderItem,
     Order,
     User,
+    Promocode,
 )
 
 
@@ -22,7 +23,7 @@ class CategoryModelTest(TestCase):
 
     def test_description_max_length(self):
         max_length = self.category._meta.get_field("description").max_length
-        self.assertEquals(max_length, 100)
+        self.assertEquals(max_length, 200)
 
     def test_object_name_is_title(self):
         expected_category_name = self.category.title
@@ -200,7 +201,7 @@ class OrerItemModelTest(TestCase):
             category=Category.objects.get(id=self.category.id),
             user=User.objects.get(id=self.user.id),
         )
-        self.order = Order.objects.create(user=self.user, total_price=1)
+        self.order = Order.objects.create(user=self.user, price=1)
 
     def test_order_item_name_is_id_user_product_quantity(self):
         order_item = OrderItem.objects.create(
@@ -227,8 +228,16 @@ class OrerModelTest(TestCase):
         )
 
     def test_order_name_is_id_user_product_quantity(self):
-        order = Order.objects.create(user=self.user, total_price=1)
+        order = Order.objects.create(user=self.user, price=1)
         expected_order_name = (
-            f"{order.id} {order.user} {order.status} {order.total_price}"
+            f"{order.id} {order.user} {order.status} {order.price} - {order.price_with_discount}"
         )
         self.assertEquals(expected_order_name, str(order))
+
+class PromocodeModelTest(TestCase):
+    def setUp(self):
+        self.promocode = Promocode.objects.create(code='twenty', discount=20)
+
+    def test_promocode_name_is_code_discount(self):
+        expected_promocode_name = f"{self.promocode.code} - {self.promocode.discount}"
+        self.assertEquals(expected_promocode_name, str(self.promocode))

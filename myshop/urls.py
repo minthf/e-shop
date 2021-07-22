@@ -12,6 +12,8 @@ from .views import (
     CartDetailView,
     OrderCreateView,
     OrderListView,
+    PromocodeListView,
+    PromocodeDetailView,
 )
 
 
@@ -52,4 +54,6 @@ urlpatterns = [
     path("cart/<int:pk>/", CartDetailView.as_view(), name="cart-detail"),
     path("cart/checkout/", OrderCreateView.as_view(), name="checkout-cart"),
     path("orders/", OrderListView.as_view(), name="orders"),
+    path("promocodes/", PromocodeListView.as_view(), name="promocodes-list"),
+    path("promocodes/<int:pk>/", PromocodeDetailView.as_view(), name="promocode-detail"),
 ]

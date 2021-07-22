@@ -15,7 +15,7 @@ class Category(models.Model):
     """Category of Products in shop"""
 
     title = models.CharField(verbose_name="Title", max_length=50, unique=True)
-    description = models.CharField(verbose_name="Description", max_length=100)
+    description = models.CharField(verbose_name="Description", max_length=200)
 
     class Meta:
         verbose_name_plural = "Categories"
@@ -27,8 +27,8 @@ class Category(models.Model):
 class Product(models.Model):
     """Product in shop"""
 
-    title = models.CharField(verbose_name="Title", max_length=50)
-    description = models.CharField(verbose_name="Description", max_length=100)
+    title = models.CharField(verbose_name="Title", max_length=150)
+    description = models.CharField(verbose_name="Description", max_length=500)
     creation_date = models.DateTimeField(auto_now_add=True)
     price = models.DecimalField(
         max_digits=10, decimal_places=2, validators=[MinValueValidator(0)]
@@ -164,13 +164,14 @@ class Order(models.Model):
         on_delete=models.CASCADE,
     )
     date = models.DateTimeField(auto_now_add=True)
-    total_price = models.IntegerField(validators=[MinValueValidator(0)])
+    price = models.IntegerField(default=0, validators=[MinValueValidator(0)])
+    price_with_discount = models.IntegerField(default=0, validators=[MinValueValidator(0)])
     status = models.CharField(
         choices=statuses, default="ordered", max_length=8
     )
 
     def __str__(self):
-        return f"{self.id} {self.user} {self.status} {self.total_price}"
+        return f"{self.id} {self.user} {self.status} {self.price} - {self.price_with_discount}"
 
 
 class OrderItem(models.Model):
@@ -187,3 +188,12 @@ class OrderItem(models.Model):
 
     def __str__(self):
         return f"{self.id} {self.product} - {self.quantity}"
+
+
+class Promocode(models.Model):
+    code = models.CharField(verbose_name="Promocode", max_length=50, unique=True)
+    discount = models.IntegerField(
+        default=0, validators=[MaxValueValidator(100), MinValueValidator(0)])
+
+    def __str__(self):
+        return f"{self.code} - {self.discount}"

@@ -7,6 +7,7 @@ from .models import (
     ProductPicture,
     OrderItem,
     Order,
+    Promocode,
 )
 from decouple import config
 
@@ -104,4 +105,10 @@ class OrderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Order
+        fields = "__all__"
+
+
+class PromocodeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Promocode
         fields = "__all__"

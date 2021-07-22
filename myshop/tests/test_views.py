@@ -10,6 +10,7 @@ from myshop.models import (
     OrderItem,
     Order,
     User,
+    Promocode,
 )
 
 
@@ -469,6 +470,7 @@ class OrderCreateViewTest(APITestCase):
         self.cart_item5 = CartItem.objects.create(
             product=self.product, user=self.user2, quantity=5
         )
+        self.promocode = Promocode.objects.create(code='twenty', discount=20)
 
     def test_create_order(self):
         url = reverse("checkout-cart")
@@ -493,6 +495,28 @@ class OrderCreateViewTest(APITestCase):
         response = self.client.post(url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
+    def test_create_order_with_correct_promocode(self):
+        url = reverse("checkout-cart")
+        self.client.force_authenticate(self.user1)
+        data = {
+            "ids": 
+                [self.cart_item3.id, self.cart_item4.id],
+            "promocode": "twenty"   
+            }
+        response = self.client.post(url, data, format="json")
+        self.assertEqual(response.data.get('price_with_discount'), response.data.get('price')-(float((response.data.get('price'))) / 100 * 20))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_create_order_with_incorrect_promocode(self):
+        url = reverse("checkout-cart")
+        self.client.force_authenticate(self.user1)
+        data = {
+            "ids": 
+                [self.cart_item3.id, self.cart_item4.id],
+            "promocode": "123"   
+            }
+        response = self.client.post(url, data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
 class CategoriesViewTest(APITestCase):
     def setUp(self):
@@ -696,5 +720,125 @@ class ProductPictureDetailView(APITestCase):
             "products-pictures-detail", args=(self.product.id, self.picure1.id)
         )
         self.client.force_authenticate(self.user1)
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+
+class PromocodesViewTest(APITestCase):
+    def setUp(self):
+        self.promocode = Promocode.objects.create(code="twenty", discount=20)
+        self.user1 = User.objects.create(
+            username="mint1", password="12345", is_supplier=True
+        )
+        self.user2 = User.objects.create(username="mint2", password="12345")
+        self.user3 = User.objects.create(
+            username="mint3", password="12345", is_staff=True
+        )
+
+    def test_get_promocodes_supplier(self):
+        url = reverse("promocodes-list")
+        self.client.force_authenticate(self.user1)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_get_promocodes_client(self):
+        url = reverse("promocodes-list")
+        self.client.force_authenticate(self.user2)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_get_promocodes_admin(self):
+        url = reverse("promocodes-list")
+        self.client.force_authenticate(self.user3)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_post_promocodes_supplier(self):
+        url = reverse("promocodes-list")
+        self.client.force_authenticate(self.user1)
+        data = {"code": "fifty", "discount": 50}
+        response = self.client.post(url, data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_post_promocodes_client(self):
+        url = reverse("promocodes-list")
+        self.client.force_authenticate(self.user2)
+        data = {"code": "fifty", "discount": 50}
+        response = self.client.post(url, data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_post_promocodes_admin(self):
+        url = reverse("promocodes-list")
+        self.client.force_authenticate(self.user3)
+        data = {"code": "fifty", "discount": 50}
+        response = self.client.post(url, data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+
+class PromocodeDetailViewTest(APITestCase):
+    def setUp(self):
+        self.promocode = Promocode.objects.create(code="twenty", discount=20)
+        self.user1 = User.objects.create(
+            username="mint1", password="12345", is_supplier=True
+        )
+        self.user2 = User.objects.create(username="mint2", password="12345")
+        self.user3 = User.objects.create(
+            username="mint3", password="12345", is_staff=True
+        )
+
+    def test_get_promocode_detail_supplier(self):
+        url = reverse("promocode-detail", args=(self.promocode.id,))
+        self.client.force_authenticate(self.user1)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_get_promocode_detail_client(self):
+        url = reverse("promocode-detail", args=(self.promocode.id,))
+        self.client.force_authenticate(self.user2)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_get_promocode_detail_admin(self):
+        url = reverse("promocode-detail", args=(self.promocode.id,))
+        self.client.force_authenticate(self.user3)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_patch_promocode_detail_supplier(self):
+        url = reverse("promocode-detail", args=(self.promocode.id,))
+        self.client.force_authenticate(self.user1)
+        data = {"title": "qwf", "description": "123"}
+        response = self.client.patch(url, data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_patch_promocode_detail_client(self):
+        url = reverse("promocode-detail", args=(self.promocode.id,))
+        self.client.force_authenticate(self.user2)
+        data = {"title": "qwf", "description": "123"}
+        response = self.client.patch(url, data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_patch_promocode_detail_admin(self):
+        url = reverse("promocode-detail", args=(self.promocode.id,))
+        self.client.force_authenticate(self.user3)
+        data = {"title": "qwf", "description": "123"}
+        response = self.client.patch(url, data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_delete_promocode_detail_supplier(self):
+        url = reverse("promocode-detail", args=(self.promocode.id,))
+        self.client.force_authenticate(self.user1)
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_delete_promocode_detail_client(self):
+        url = reverse("promocode-detail", args=(self.promocode.id,))
+        self.client.force_authenticate(self.user2)
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_delete_promocode_detail_admin(self):
+        url = reverse("promocode-detail", args=(self.promocode.id,))
+        self.client.force_authenticate(self.user3)
         response = self.client.delete(url)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
