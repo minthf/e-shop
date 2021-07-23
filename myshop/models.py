@@ -138,7 +138,8 @@ class CartItem(models.Model):
     quantity = models.IntegerField(
         default=1, validators=[MinValueValidator(0)]
     )
-    price = models.IntegerField(default=0, validators=[MinValueValidator(0)])
+    price = models.DecimalField(
+        max_digits=10, decimal_places=2, validators=[MinValueValidator(0)])
 
     def __str__(self):
         return f"{self.id} {self.user} {self.product} - {self.quantity}"
@@ -164,9 +165,11 @@ class Order(models.Model):
         on_delete=models.CASCADE,
     )
     date = models.DateTimeField(auto_now_add=True)
-    price = models.IntegerField(default=0, validators=[MinValueValidator(0)])
-    price_with_discount = models.IntegerField(
-        default=0, validators=[MinValueValidator(0)]
+    price = models.DecimalField(
+        max_digits=10, decimal_places=2, validators=[MinValueValidator(0)]
+        )
+    price_with_discount = models.DecimalField(
+        max_digits=10, decimal_places=2, validators=[MinValueValidator(0)]
     )
     status = models.CharField(
         choices=statuses, default="ordered", max_length=8
@@ -183,7 +186,8 @@ class OrderItem(models.Model):
     quantity = models.IntegerField(
         default=1, validators=[MinValueValidator(0)]
     )
-    price = models.IntegerField(default=0, validators=[MinValueValidator(0)])
+    price = models.DecimalField(
+        max_digits=10, decimal_places=2, validators=[MinValueValidator(0)])
     order = models.ForeignKey(
         Order, related_name="order_items", on_delete=models.CASCADE
     )
