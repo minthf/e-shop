@@ -201,11 +201,11 @@ class OrerItemModelTest(TestCase):
             category=Category.objects.get(id=self.category.id),
             user=User.objects.get(id=self.user.id),
         )
-        self.order = Order.objects.create(user=self.user, price=1)
+        self.order = Order.objects.create(user=self.user, price=1, price_with_discount=1)
 
     def test_order_item_name_is_id_user_product_quantity(self):
         order_item = OrderItem.objects.create(
-            product=self.product, quantity=5, order=self.order
+            product=self.product, quantity=6, price=1, order=self.order
         )
         expected_order_item_name = (
             f"{order_item.id} {order_item.product} - {order_item.quantity}"
@@ -228,7 +228,7 @@ class OrerModelTest(TestCase):
         )
 
     def test_order_name_is_id_user_product_quantity(self):
-        order = Order.objects.create(user=self.user, price=1)
+        order = Order.objects.create(user=self.user, price=1, price_with_discount=1)
         expected_order_name = f"{order.id} {order.user} {order.status} {order.price} - {order.price_with_discount}"
         self.assertEquals(expected_order_name, str(order))
 

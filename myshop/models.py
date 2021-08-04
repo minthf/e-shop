@@ -30,7 +30,7 @@ class Product(models.Model):
     title = models.CharField(verbose_name="Title", max_length=150)
     description = models.CharField(verbose_name="Description", max_length=500)
     creation_date = models.DateTimeField(auto_now_add=True)
-    price = models.DecimalField(
+    price = models.DecimalField(blank=True,
         max_digits=10, decimal_places=2, validators=[MinValueValidator(0)]
     )
     discount = models.IntegerField(
@@ -45,6 +45,7 @@ class Product(models.Model):
         on_delete=models.CASCADE,
     )
     rating = models.DecimalField(
+        blank=True,
         default=0,
         max_digits=5,
         decimal_places=2,
@@ -138,7 +139,7 @@ class CartItem(models.Model):
     quantity = models.IntegerField(
         default=1, validators=[MinValueValidator(0)]
     )
-    price = models.DecimalField(
+    price = models.DecimalField(blank=True,
         max_digits=10, decimal_places=2, validators=[MinValueValidator(0)])
 
     def __str__(self):
@@ -165,10 +166,10 @@ class Order(models.Model):
         on_delete=models.CASCADE,
     )
     date = models.DateTimeField(auto_now_add=True)
-    price = models.DecimalField(
+    price = models.DecimalField(blank=True,
         max_digits=10, decimal_places=2, validators=[MinValueValidator(0)]
         )
-    price_with_discount = models.DecimalField(
+    price_with_discount = models.DecimalField(blank=True,
         max_digits=10, decimal_places=2, validators=[MinValueValidator(0)]
     )
     status = models.CharField(
@@ -186,7 +187,7 @@ class OrderItem(models.Model):
     quantity = models.IntegerField(
         default=1, validators=[MinValueValidator(0)]
     )
-    price = models.DecimalField(
+    price = models.DecimalField(blank=True,
         max_digits=10, decimal_places=2, validators=[MinValueValidator(0)])
     order = models.ForeignKey(
         Order, related_name="order_items", on_delete=models.CASCADE

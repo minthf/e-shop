@@ -504,8 +504,8 @@ class OrderCreateViewTest(APITestCase):
         }
         response = self.client.post(url, data, format="json")
         self.assertEqual(
-            response.data.get("price_with_discount"),
-            response.data.get("price")
+            float(response.data.get("price_with_discount")),
+            float(response.data.get("price"))
             - (float((response.data.get("price"))) / 100 * 20),
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
